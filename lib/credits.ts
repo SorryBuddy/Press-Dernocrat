@@ -23,15 +23,15 @@ export const creditTeam: CreditPerson[] = [
     name: "Joel Mulonde",
     role: "Digital Director",
     description:
-      "Helps run the social media and works on the website with Jordan.",
-    avatarLabel: "N/A",
+      "Helps run the social media and works on the website with Jordan—keeping posts timely, pages updated, and the chaos at least somewhat organized.",
+    image: "/joel.png",
   },
   {
     id: "sir-gpt",
     name: "Sir GPT",
     role: "Automated Correspondent",
     description:
-      "A neural knight errant who may have had a role or two in image generation and coding the website—among other odd-hour duties. Knighted for services to absurdity and insists it was only \"assistive.\"",
+      "An AI assistant who may have pitched in on image generation, coding the website, and a headline or two—then insisted it was only \"assistive.\"",
     image: "/sir-gpt.svg",
   },
 ];

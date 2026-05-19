@@ -21,8 +21,8 @@ export default function CreditsPage() {
           Credits
         </h2>
         <p className="mt-3 max-w-2xl font-sans text-base leading-relaxed text-neutral-600">
-          Press Dernocrat Daily is brought to you by humans, one robot knight, and
-          an unreasonable number of Sonoma County punchlines.
+          Press Dernocrat Daily is brought to you by humans, one chatbot correspondent,
+          and a steady diet of fake-but-funny news meant to make you laugh.
         </p>
 
         <div className="mt-12 grid gap-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
@@ -32,7 +32,7 @@ export default function CreditsPage() {
         </div>
 
         <p className="mt-16 border-t border-neutral-200 pt-8 text-center font-sans text-xs text-neutral-500">
-          No actual democrats, presses, or knights were harmed in the making of this
+          No actual democrats or presses were harmed in the making of this
           publication.
         </p>
       </main>

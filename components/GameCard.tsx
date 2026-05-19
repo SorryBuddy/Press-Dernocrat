@@ -57,6 +57,25 @@ const decorations: Record<
       </svg>
     ),
   },
+  "reaction-time": {
+    accent: "from-emerald-100/80 to-transparent",
+    pattern:
+      "bg-[radial-gradient(circle_at_50%_50%,#10b981_2px,transparent_2px)] bg-[size:16px_16px]",
+    icon: (
+      <svg viewBox="0 0 48 48" className="h-10 w-10" aria-hidden>
+        <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" strokeWidth="2" />
+        <path
+          d="M24 12v14l8 5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="24" cy="24" r="3" fill="currentColor" />
+      </svg>
+    ),
+  },
   sudoku: {
     accent: "from-slate-200/80 to-transparent",
     pattern:

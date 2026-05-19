@@ -28,4 +28,11 @@ export const games: GameInfo[] = [
     description: "Fill the grid — one number per row, column, and box.",
     tag: "Puzzle",
   },
+  {
+    slug: "reaction-time",
+    href: "/games/reaction-time",
+    title: "Reaction Time Test",
+    description: "Wait for green, then tap — see how fast your reflexes are.",
+    tag: "Reflex",
+  },
 ];
