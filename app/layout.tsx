@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/components/AuthProvider";
 import { CoinBalance } from "@/components/CoinBalance";
 import { CoinsProvider } from "@/components/CoinsProvider";
 import type { Metadata } from "next";
@@ -30,10 +31,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable} h-full`}>
       <body className="min-h-full flex flex-col font-sans antialiased">
-        <CoinsProvider>
-          <CoinBalance />
-          {children}
-        </CoinsProvider>
+        <AuthProvider>
+          <CoinsProvider>
+            <CoinBalance />
+            {children}
+          </CoinsProvider>
+        </AuthProvider>
       </body>
     </html>
   );

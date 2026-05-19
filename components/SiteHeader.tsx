@@ -1,10 +1,11 @@
 "use client";
 
+import { useAuth } from "@/components/AuthProvider";
 import { LocalWeather } from "@/components/LocalWeather";
 import { siteContainerClass } from "@/lib/site-layout";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -14,7 +15,10 @@ const navLinks = [
 ];
 
 export function SiteHeader() {
+  const { user, openAuth, logout, ready: authReady } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -27,6 +31,21 @@ export function SiteHeader() {
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
+
+  useEffect(() => {
+    setAccountOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!accountOpen) return;
+    const onPointerDown = (e: MouseEvent) => {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+        setAccountOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [accountOpen]);
 
   return (
     <>
@@ -52,15 +71,64 @@ export function SiteHeader() {
             Serving Sonoma County since yesterday
           </p>
 
-          <div className="flex shrink-0 gap-1">
+          <div className="relative flex shrink-0 gap-1" ref={accountRef}>
             <button
               type="button"
+              onClick={() => setAccountOpen((o) => !o)}
               className="hidden items-center gap-1 rounded px-2 py-1 text-sm text-neutral-700 hover:bg-neutral-100 sm:flex"
               aria-label="Account"
+              aria-expanded={accountOpen}
             >
               <UserIcon />
+              <span className="max-w-[8rem] truncate text-xs font-semibold">
+                {authReady && user ? user.name.split(" ")[0] : "Account"}
+              </span>
               <span className="text-xs">▼</span>
             </button>
+            {accountOpen && (
+              <div className="absolute right-0 top-full z-50 mt-1 min-w-[10rem] rounded-lg border border-neutral-200 bg-white py-1 shadow-lg">
+                {user ? (
+                  <>
+                    <p className="border-b border-neutral-100 px-3 py-2 font-sans text-xs text-neutral-500">
+                      {user.email}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAccountOpen(false);
+                        void logout();
+                      }}
+                      className="block w-full px-3 py-2 text-left font-sans text-sm text-neutral-800 hover:bg-neutral-50"
+                    >
+                      Log out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAccountOpen(false);
+                        openAuth("login");
+                      }}
+                      className="block w-full px-3 py-2 text-left font-sans text-sm text-neutral-800 hover:bg-neutral-50"
+                    >
+                      Log in
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAccountOpen(false);
+                        openAuth("signup");
+                      }}
+                      className="block w-full px-3 py-2 text-left font-sans text-sm font-semibold text-[#c41230] hover:bg-neutral-50"
+                    >
+                      Sign up
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
             <button
               type="button"
               className="flex h-10 w-10 items-center justify-center rounded hover:bg-neutral-100"

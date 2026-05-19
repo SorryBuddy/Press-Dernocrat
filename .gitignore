@@ -20,6 +20,9 @@
 # production
 /build
 
+# local user accounts (dev)
+/data/
+
 # misc
 .DS_Store
 *.pem
