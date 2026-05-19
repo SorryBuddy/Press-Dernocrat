@@ -13,7 +13,7 @@ export const creditTeam: CreditPerson[] = [
     name: "Jordan Herrera",
     role: "Editor-in-Chief",
     description:
-      "Founded Press Dernocrat Daily after deciding traditional journalism needed more alliteration and fewer fact-checkers. Oversees headlines, typos, and the emergency snack drawer. Once won a debate using only newspaper puns.",
+      "Created the idea for Press Dernocrat Daily—the social media, the website, and the rest of the operation—and recruited Joel Mulonde to help bring it to life.",
     initials: "JH",
   },
   {
@@ -21,7 +21,7 @@ export const creditTeam: CreditPerson[] = [
     name: "Joel Mulonde",
     role: "Digital Director",
     description:
-      "Builds the site, fixes what breaks, and insists every game page load in under three coffee sips. Responsible for making the hamburger menu actually open. Does not trust robots—except in tic-tac-toe.",
+      "Helps run the social media and works on the website with Jordan. The other half of keeping the feed updated and the site standing.",
     initials: "JM",
   },
   {
@@ -29,7 +29,7 @@ export const creditTeam: CreditPerson[] = [
     name: "Sir GPT",
     role: "Automated Correspondent",
     description:
-      "A neural knight errant who drafts stories at odd hours and never sleeps. Knighted for services to absurdity. Speaks exclusively in confident paragraphs and occasionally invents quotes that sound too real.",
+      "A neural knight errant who may have had a role or two in image generation and coding the website—among other odd-hour duties. Knighted for services to absurdity and insists it was only \"assistive.\"",
     image: "/sir-gpt.svg",
   },
 ];
