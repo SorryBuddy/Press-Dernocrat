@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --accent: #c41230;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --font-serif: var(--font-serif), "Georgia", "Times New Roman", serif;
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+@keyframes coin-flip-spin {
+  0% {
+    transform: rotateY(0deg) translateY(0);
+  }
+  20% {
+    transform: rotateY(360deg) translateY(-14px);
+  }
+  40% {
+    transform: rotateY(720deg) translateY(0);
+  }
+  60% {
+    transform: rotateY(1080deg) translateY(-10px);
+  }
+  80% {
+    transform: rotateY(1440deg) translateY(-4px);
+  }
+  100% {
+    transform: rotateY(1800deg) translateY(0);
+  }
+}
+
+.coin-scene {
+  perspective: 800px;
+}
+
+.coin-flip-animate {
+  animation: coin-flip-spin 1s ease-in-out forwards;
+}
+
+.coin-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.4s ease-out;
+}
+
+.coin-face {
+  backface-visibility: hidden;
+}
+
+/* Casino / Risk Taking */
+.casino-bg {
+  background-color: #0a0610;
+  background-image:
+    radial-gradient(ellipse 140% 100% at 50% 0%, rgba(251, 191, 36, 0.18), transparent 55%),
+    radial-gradient(ellipse 100% 80% at 100% 50%, rgba(190, 24, 93, 0.14), transparent 50%),
+    radial-gradient(ellipse 100% 80% at 0% 100%, rgba(124, 58, 237, 0.14), transparent 50%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(251, 191, 36, 0.08), transparent 45%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 48px,
+      rgba(251, 191, 36, 0.04) 48px,
+      rgba(251, 191, 36, 0.04) 49px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 48px,
+      rgba(251, 191, 36, 0.04) 48px,
+      rgba(251, 191, 36, 0.04) 49px
+    );
+}
+
+.casino-bg-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.casino-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+}
+
+.casino-spotlight {
+  animation: casino-glow 6s ease-in-out infinite alternate;
+}
+
+@keyframes casino-glow {
+  0% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes slot-reel-blur {
+  0%,
+  100% {
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  50% {
+    transform: translateY(-4px);
+    filter: blur(2px);
+  }
+}
+
+.slot-reel-spin {
+  animation: slot-reel-blur 0.12s linear infinite;
+}
+
+@keyframes slot-reel-bounce {
+  0% {
+    transform: scale(1.15);
+  }
+  60% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.slot-reel-land {
+  animation: slot-reel-bounce 0.35s ease-out;
+}
+
+@keyframes slot-win-flash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+  }
+  50% {
+    box-shadow: 0 0 40px 8px rgba(251, 191, 36, 0.35);
+  }
+}
+
+.slot-win-pulse {
+  animation: slot-win-flash 0.6s ease-in-out 3;
+}
+
+.wheel-spin {
+  will-change: transform;
+}
