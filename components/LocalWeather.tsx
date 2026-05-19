@@ -154,7 +154,13 @@ function WeatherIcon({ code }: { code: number }) {
   );
 }
 
-export function LocalWeather() {
+type LocalWeatherProps = {
+  /** Light text for dark casino / Risk Taking pages. */
+  variant?: "default" | "dark";
+};
+
+export function LocalWeather({ variant = "default" }: LocalWeatherProps) {
+  const isDark = variant === "dark";
   const [weather, setWeather] = useState<WeatherState>({
     tempF: 0,
     weatherCode: 0,
@@ -192,24 +198,36 @@ export function LocalWeather() {
     <div className="flex min-w-0 flex-col" aria-label="Local weather and date">
       <div className="flex items-center gap-2">
         <WeatherIcon code={weather.weatherCode} />
-        <p className="font-sans text-base font-semibold tabular-nums text-neutral-900 sm:text-lg">
+        <p
+          className={`font-sans text-base font-semibold tabular-nums sm:text-lg ${
+            isDark ? "text-white" : "text-neutral-900"
+          }`}
+        >
           {weather.loading ? (
-            <span className="text-neutral-400">—°F</span>
+            <span className={isDark ? "text-white/50" : "text-neutral-400"}>—°F</span>
           ) : (
             <span>{weather.tempF}°F</span>
           )}
         </p>
         {!weather.loading && (
-          <span className="sr-only sm:not-sr-only sm:text-xs sm:text-neutral-500">
+          <span
+            className={`sr-only sm:not-sr-only sm:text-xs ${
+              isDark ? "text-white/75" : "text-neutral-500"
+            }`}
+          >
             {description}
           </span>
         )}
       </div>
-      <p className="mt-0.5 max-w-[11rem] truncate font-sans text-[10px] leading-tight text-neutral-600 sm:max-w-none sm:text-[11px] sm:whitespace-normal">
+      <p
+        className={`mt-0.5 max-w-[11rem] truncate font-sans text-[10px] leading-tight sm:max-w-none sm:text-[11px] sm:whitespace-normal ${
+          isDark ? "text-white/80" : "text-neutral-600"
+        }`}
+      >
         {dateLabel}
       </p>
       {weather.usingFallbackLocation && !weather.loading && (
-        <p className="mt-0.5 font-sans text-[10px] text-neutral-400">
+        <p className={`mt-0.5 font-sans text-[10px] ${isDark ? "text-white/60" : "text-neutral-400"}`}>
           Sonoma County (location unavailable)
         </p>
       )}

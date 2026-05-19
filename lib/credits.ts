@@ -4,6 +4,8 @@ export type CreditPerson = {
   role: string;
   description: string;
   image?: string;
+  /** Shown in the avatar circle when there is no image (e.g. "N/A"). */
+  avatarLabel?: string;
   initials?: string;
 };
 
@@ -13,16 +15,16 @@ export const creditTeam: CreditPerson[] = [
     name: "Jordan Herrera",
     role: "Editor-in-Chief",
     description:
-      "Created the idea for Press Dernocrat Daily—the social media, the website, and the rest of the operation—and recruited Joel Mulonde to help bring it to life.",
-    initials: "JH",
+      "Created the idea for Press Dernocrat Daily—the social media, the website, and the rest—and recruited Joel Mulonde to help run it.",
+    image: "/jordan.png",
   },
   {
     id: "joel-mulonde",
     name: "Joel Mulonde",
     role: "Digital Director",
     description:
-      "Helps run the social media and works on the website with Jordan. The other half of keeping the feed updated and the site standing.",
-    initials: "JM",
+      "Helps run the social media and works on the website with Jordan.",
+    avatarLabel: "N/A",
   },
   {
     id: "sir-gpt",

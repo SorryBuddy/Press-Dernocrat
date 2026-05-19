@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/AuthProvider";
 import { LocalWeather } from "@/components/LocalWeather";
-import { siteContainerClass } from "@/lib/site-layout";
+import { isRiskTakingPath, siteContainerClass } from "@/lib/site-layout";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -20,6 +20,7 @@ export function SiteHeader() {
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const isRiskTaking = isRiskTakingPath(pathname);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -49,25 +50,37 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="border-b border-neutral-200 bg-white">
+      <header
+        className={
+          isRiskTaking
+            ? "border-b border-amber-500/25 bg-[#0a0610]/95 backdrop-blur-sm"
+            : "border-b border-neutral-200 bg-white"
+        }
+      >
         <div className={`relative flex items-center justify-between gap-4 py-2 pr-[5.5rem] ${siteContainerClass}`}>
           <div className="flex min-w-0 items-center gap-3 sm:gap-6">
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded hover:bg-neutral-100"
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded ${
+              isRiskTaking ? "hover:bg-white/10" : "hover:bg-neutral-100"
+            }`}
             aria-label="Open menu"
           >
             <span className="flex flex-col gap-1">
-              <span className="block h-0.5 w-5 bg-neutral-900" />
-              <span className="block h-0.5 w-5 bg-neutral-900" />
-              <span className="block h-0.5 w-5 bg-neutral-900" />
+              <span className={`block h-0.5 w-5 ${isRiskTaking ? "bg-white" : "bg-neutral-900"}`} />
+              <span className={`block h-0.5 w-5 ${isRiskTaking ? "bg-white" : "bg-neutral-900"}`} />
+              <span className={`block h-0.5 w-5 ${isRiskTaking ? "bg-white" : "bg-neutral-900"}`} />
             </span>
           </button>
-            <LocalWeather />
+            <LocalWeather variant={isRiskTaking ? "dark" : "default"} />
           </div>
 
-          <p className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 text-center font-serif text-[10px] uppercase tracking-[0.2em] text-neutral-500 lg:block">
+          <p
+            className={`pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 text-center font-serif text-[10px] uppercase tracking-[0.2em] lg:block ${
+              isRiskTaking ? "text-white/80" : "text-neutral-500"
+            }`}
+          >
             Serving Sonoma County since yesterday
           </p>
 
@@ -75,7 +88,11 @@ export function SiteHeader() {
             <button
               type="button"
               onClick={() => setAccountOpen((o) => !o)}
-              className="hidden items-center gap-1 rounded px-2 py-1 text-sm text-neutral-700 hover:bg-neutral-100 sm:flex"
+              className={`hidden items-center gap-1 rounded px-2 py-1 text-sm sm:flex ${
+                isRiskTaking
+                  ? "text-white hover:bg-white/10"
+                  : "text-neutral-700 hover:bg-neutral-100"
+              }`}
               aria-label="Account"
               aria-expanded={accountOpen}
             >
@@ -131,7 +148,9 @@ export function SiteHeader() {
             )}
             <button
               type="button"
-              className="flex h-10 w-10 items-center justify-center rounded hover:bg-neutral-100"
+              className={`flex h-10 w-10 items-center justify-center rounded ${
+                isRiskTaking ? "text-white hover:bg-white/10" : "hover:bg-neutral-100"
+              }`}
               aria-label="Search"
             >
               <SearchIcon />
@@ -139,12 +158,24 @@ export function SiteHeader() {
           </div>
         </div>
 
-        <div className={`border-t border-neutral-100 py-4 text-center sm:py-6 ${siteContainerClass}`}>
+        <div
+          className={`border-t py-4 text-center sm:py-6 ${siteContainerClass} ${
+            isRiskTaking ? "border-amber-500/20" : "border-neutral-100"
+          }`}
+        >
           <Link href="/">
-            <h1 className="font-serif text-2xl font-bold leading-tight tracking-tight text-neutral-900 sm:text-4xl md:text-5xl">
+            <h1
+              className={`font-serif text-2xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl ${
+                isRiskTaking ? "text-amber-50" : "text-neutral-900"
+              }`}
+            >
               Press Dernocrat Daily
             </h1>
-            <p className="mt-1 font-sans text-sm text-neutral-600 sm:text-base">
+            <p
+              className={`mt-1 font-sans text-sm sm:text-base ${
+                isRiskTaking ? "text-white/75" : "text-neutral-600"
+              }`}
+            >
               (a parody news source)
             </p>
           </Link>

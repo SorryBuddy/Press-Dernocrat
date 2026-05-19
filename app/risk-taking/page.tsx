@@ -38,7 +38,7 @@ export default function RiskTakingPage() {
           ))}
         </div>
 
-        <p className="relative mt-12 max-w-xl font-sans text-xs leading-relaxed text-amber-200/50">
+        <p className="relative mt-12 max-w-xl font-sans text-xs leading-relaxed text-white/75">
           Parody only. Outcomes are suggestions, not medical, legal, or homework advice.
           Play responsibly among friends who consented to chaos.
         </p>

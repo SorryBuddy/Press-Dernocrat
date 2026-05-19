@@ -19,8 +19,14 @@ export function CreditCard({ person }: { person: CreditPerson }) {
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-neutral-200 to-neutral-300">
-            <span className="font-serif text-3xl font-bold text-neutral-600">
-              {person.initials}
+            <span
+              className={
+                person.avatarLabel
+                  ? "font-sans text-xl font-bold tracking-wide text-neutral-500"
+                  : "font-serif text-3xl font-bold text-neutral-600"
+              }
+            >
+              {person.avatarLabel ?? person.initials}
             </span>
           </div>
         )}

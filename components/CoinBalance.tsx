@@ -1,6 +1,8 @@
 "use client";
 
 import { useCoins } from "@/components/CoinsProvider";
+import { isRiskTakingPath } from "@/lib/site-layout";
+import { usePathname } from "next/navigation";
 
 function RedCoinIcon() {
   return (
@@ -30,14 +32,24 @@ function RedCoinIcon() {
 
 export function CoinBalance() {
   const { balance, ready } = useCoins();
+  const pathname = usePathname();
+  const isRiskTaking = isRiskTakingPath(pathname);
 
   return (
     <div
-      className="fixed top-2 right-2 z-[100] flex items-center gap-2 rounded-full border border-neutral-200/90 bg-white/95 px-3 py-1.5 shadow-md backdrop-blur-sm"
+      className={`fixed top-2 right-2 z-[100] flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-md backdrop-blur-sm ${
+        isRiskTaking
+          ? "border-amber-500/35 bg-[#1a0f1f]/95"
+          : "border-neutral-200/90 bg-white/95"
+      }`}
       aria-label={`Coin balance: ${balance}`}
     >
       <RedCoinIcon />
-      <span className="min-w-[2.5ch] font-sans text-base font-bold tabular-nums text-neutral-900">
+      <span
+        className={`min-w-[2.5ch] font-sans text-base font-bold tabular-nums ${
+          isRiskTaking ? "text-white" : "text-neutral-900"
+        }`}
+      >
         {ready ? balance : "…"}
       </span>
     </div>
