@@ -24,7 +24,7 @@ export const creditTeam: CreditPerson[] = [
     role: "Digital Director",
     description:
       "Helps run the social media and works on the website with Jordan—keeping posts timely, pages updated, and the chaos at least somewhat organized.",
-    image: "/joel.png",
+    image: "/joel.jpg",
   },
   {
     id: "sir-gpt",
