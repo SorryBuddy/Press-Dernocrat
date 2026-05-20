@@ -25,6 +25,16 @@ const decorations: Record<
       </span>
     ),
   },
+  plinko: {
+    accent: "from-cyan-500/20 via-amber-500/10 to-transparent",
+    pattern:
+      "bg-[radial-gradient(circle_at_30%_70%,#fbbf24_2px,transparent_2px)] bg-[length:14px_14px]",
+    icon: (
+      <span className="text-4xl" aria-hidden>
+        🪙
+      </span>
+    ),
+  },
 };
 
 export function RiskGameCard({ game }: { game: RiskGameInfo }) {

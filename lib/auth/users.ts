@@ -49,6 +49,70 @@ export async function findUserById(id: string): Promise<StoredUser | null> {
   return users.find((u) => u.id === id) ?? null;
 }
 
+function guestEmail(deviceId: string): string {
+  return `guest-${deviceId.trim().toLowerCase()}@pressdernocrat.local`;
+}
+
+export async function findGuestByDeviceId(deviceId: string): Promise<StoredUser | null> {
+  const email = guestEmail(deviceId);
+  const users = await readAllUsers();
+  return users.find((u) => u.email === email) ?? null;
+}
+
+export async function listAllUsers(): Promise<PublicUser[]> {
+  const users = await readAllUsers();
+  return users
+    .map(toPublicUser)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function createGuestUser(
+  deviceId: string,
+  initialCoins?: number,
+): Promise<StoredUser> {
+  const id = deviceId.trim();
+  if (!id || id.length < 8) {
+    throw new Error("Invalid device id.");
+  }
+
+  const existing = await findGuestByDeviceId(id);
+  if (existing) return existing;
+
+  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
+  const user: StoredUser = {
+    id: randomUUID(),
+    email: guestEmail(id),
+    name: `Guest ${short}`,
+    passwordHash: "",
+    coins: initialCoins ?? DEFAULT_COIN_BALANCE,
+    createdAt: new Date().toISOString(),
+    isGuest: true,
+  };
+
+  const users = await readAllUsers();
+  users.push(user);
+  await writeAllUsers(users);
+  return user;
+}
+
+export async function addCoinsToUser(
+  userId: string,
+  amount: number,
+): Promise<PublicUser | null> {
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+
+  const users = await readAllUsers();
+  const index = users.findIndex((u) => u.id === userId);
+  if (index === -1) return null;
+
+  users[index] = {
+    ...users[index],
+    coins: users[index].coins + Math.floor(amount),
+  };
+  await writeAllUsers(users);
+  return toPublicUser(users[index]);
+}
+
 export async function createUser(input: {
   email: string;
   password: string;
@@ -80,6 +144,7 @@ export async function createUser(input: {
     passwordHash: await hashPassword(input.password),
     coins: input.initialCoins ?? DEFAULT_COIN_BALANCE,
     createdAt: new Date().toISOString(),
+    isGuest: false,
   };
 
   users.push(user);

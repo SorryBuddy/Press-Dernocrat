@@ -22,4 +22,11 @@ export const riskGames: RiskGameInfo[] = [
       "Biased toward chaos. Land on punishments or rare rewards you might actually do IRL.",
     tag: "Fate",
   },
+  {
+    slug: "plinko",
+    href: "/risk-taking/plinko",
+    title: "Plinko",
+    description: "Drop a chip through the pegs and pray it finds a generous slot.",
+    tag: "Drop",
+  },
 ];

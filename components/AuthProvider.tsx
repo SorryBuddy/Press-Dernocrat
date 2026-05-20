@@ -2,6 +2,8 @@
 
 import { AuthModal } from "@/components/AuthModal";
 import type { PublicUser } from "@/lib/auth/types";
+import { getOrCreateDeviceId } from "@/lib/device-id";
+import { readStoredBalance } from "@/lib/coins";
 import {
   createContext,
   useCallback,
@@ -37,8 +39,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const res = await fetch("/api/auth/me");
       const data = (await res.json()) as { user: PublicUser | null };
-      setUser(data.user);
-      return data.user;
+      if (data.user) {
+        setUser(data.user);
+        return data.user;
+      }
+
+      const deviceId = getOrCreateDeviceId();
+      const guestRes = await fetch("/api/auth/guest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deviceId,
+          coins: readStoredBalance(),
+        }),
+      });
+      if (guestRes.ok) {
+        const guestData = (await guestRes.json()) as { user: PublicUser };
+        setUser(guestData.user);
+        window.dispatchEvent(
+          new CustomEvent("pdd-auth-changed", { detail: guestData.user }),
+        );
+        return guestData.user;
+      }
+
+      setUser(null);
+      return null;
     } catch {
       setUser(null);
       return null;

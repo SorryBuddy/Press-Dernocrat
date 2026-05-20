@@ -14,7 +14,12 @@ export async function POST(request: Request) {
     }
 
     const user = await findUserByEmail(email);
-    if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    if (
+      !user ||
+      user.isGuest ||
+      !user.passwordHash ||
+      !(await verifyPassword(password, user.passwordHash))
+    ) {
       return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
     }
 

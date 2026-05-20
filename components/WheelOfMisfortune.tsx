@@ -39,14 +39,18 @@ export function WheelOfMisfortune() {
     const landed = pickWeightedSegment();
     const index = wheelSegments.findIndex((s) => s.id === landed.id);
     const segmentCenter = index * segmentAngle + segmentAngle / 2;
-    const jitter = (Math.random() - 0.5) * (segmentAngle * 0.35);
-    const target = FULL_ROTATIONS * 360 + (360 - segmentCenter) + jitter;
 
     const before = balance;
     setSpinning(true);
     setResult(null);
     setCoinMessage(null);
-    setRotation((prev) => prev + target);
+    setRotation((prev) => {
+      const currentMod = ((prev % 360) + 360) % 360;
+      const targetMod = (360 - segmentCenter + 360) % 360;
+      let delta = targetMod - currentMod;
+      if (delta <= 0) delta += 360;
+      return prev + FULL_ROTATIONS * 360 + delta;
+    });
 
     setTimeout(() => {
       const after = applyEffect(landed.coinEffect);

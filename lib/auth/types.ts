@@ -8,6 +8,7 @@ export type PublicUser = {
 export type StoredUser = PublicUser & {
   passwordHash: string;
   createdAt: string;
+  isGuest?: boolean;
 };
 
 export type SessionPayload = {

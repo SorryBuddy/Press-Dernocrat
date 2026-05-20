@@ -4,6 +4,7 @@ export const SLOT_SPIN_COST = 5;
 export const SLOT_JACKPOT_AMOUNT = 1000;
 export const SLOT_JACKPOT_CHANCE = 0.02;
 export const WHEEL_JACKPOT_AMOUNT = 1000;
+export const PLINKO_DROP_COST = 8;
 
 export type CoinEffect =
   | { type: "multiply"; factor: number }
