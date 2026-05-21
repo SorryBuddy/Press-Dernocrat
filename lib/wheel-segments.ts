@@ -11,6 +11,12 @@ export type WheelSegment = {
   coinEffect: CoinEffect;
 };
 
+/**
+ * Wheel weights — heavily biased toward common outcomes.
+ *
+ * Mega-rewards (×10, JACKPOT) are intentionally rare (<1% combined). Modest
+ * trims and bumps dominate so the game feels noisy but not punishing.
+ */
 export const wheelSegments: WheelSegment[] = [
   {
     id: "half",
@@ -18,7 +24,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "×0.5",
     color: "#7f1d1d",
     type: "punishment",
-    weight: 14,
+    weight: 22,
     coinEffect: { type: "multiply", factor: 0.5 },
   },
   {
@@ -36,7 +42,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "−40",
     color: "#1c1917",
     type: "punishment",
-    weight: 11,
+    weight: 18,
     coinEffect: { type: "add", amount: -40 },
   },
   {
@@ -45,7 +51,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "−20",
     color: "#44403c",
     type: "punishment",
-    weight: 12,
+    weight: 22,
     coinEffect: { type: "add", amount: -20 },
   },
   {
@@ -54,7 +60,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "×1.25",
     color: "#854d0e",
     type: "reward",
-    weight: 9,
+    weight: 18,
     coinEffect: { type: "multiply", factor: 1.25 },
   },
   {
@@ -63,7 +69,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "×1.5",
     color: "#a16207",
     type: "reward",
-    weight: 8,
+    weight: 12,
     coinEffect: { type: "multiply", factor: 1.5 },
   },
   {
@@ -72,7 +78,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "×2",
     color: "#14532d",
     type: "reward",
-    weight: 7,
+    weight: 6,
     coinEffect: { type: "multiply", factor: 2 },
   },
   {
@@ -81,7 +87,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "×3",
     color: "#065f46",
     type: "reward",
-    weight: 4,
+    weight: 2,
     coinEffect: { type: "multiply", factor: 3 },
   },
   {
@@ -90,7 +96,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "×5",
     color: "#0e7490",
     type: "reward",
-    weight: 2,
+    weight: 1,
     coinEffect: { type: "multiply", factor: 5 },
   },
   {
@@ -99,7 +105,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "+15",
     color: "#312e81",
     type: "reward",
-    weight: 10,
+    weight: 20,
     coinEffect: { type: "add", amount: 15 },
   },
   {
@@ -108,7 +114,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "+50",
     color: "#4c1d95",
     type: "reward",
-    weight: 6,
+    weight: 5,
     coinEffect: { type: "add", amount: 50 },
   },
   {
@@ -117,7 +123,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "×1",
     color: "#57534e",
     type: "neutral",
-    weight: 8,
+    weight: 16,
     coinEffect: { type: "multiply", factor: 1 },
   },
   {
@@ -126,7 +132,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "×0.75",
     color: "#831843",
     type: "punishment",
-    weight: 10,
+    weight: 22,
     coinEffect: { type: "multiply", factor: 0.75 },
   },
   {
@@ -135,7 +141,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "−75",
     color: "#581c87",
     type: "punishment",
-    weight: 5,
+    weight: 3,
     coinEffect: { type: "add", amount: -75 },
   },
   {
@@ -144,7 +150,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "×10",
     color: "#b45309",
     type: "reward",
-    weight: 1,
+    weight: 0.5,
     coinEffect: { type: "multiply", factor: 10 },
   },
   {
@@ -153,7 +159,7 @@ export const wheelSegments: WheelSegment[] = [
     shortLabel: "JACKPOT",
     color: "#fbbf24",
     type: "reward",
-    weight: 2,
+    weight: 0.5,
     coinEffect: { type: "jackpot", amount: WHEEL_JACKPOT_AMOUNT },
   },
 ];

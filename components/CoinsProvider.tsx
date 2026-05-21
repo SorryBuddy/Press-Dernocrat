@@ -30,39 +30,58 @@ type CoinsContextValue = {
 
 const CoinsContext = createContext<CoinsContextValue | null>(null);
 
-function syncCoinsFromUser(user: PublicUser, setBalance: (n: number) => void) {
-  setBalance(user.coins);
-  writeStoredBalance(user.coins);
-}
-
 export function CoinsProvider({ children }: { children: React.ReactNode }) {
   const { user, ready: authReady } = useAuth();
   const [balance, setBalanceState] = useState(DEFAULT_COIN_BALANCE);
   const [ready, setReady] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  /**
+   * Source-of-truth for the balance is kept on this ref so that mutators
+   * (trySpend / applyEffect / addCoins) can read AND write the running
+   * balance synchronously. Otherwise rapid calls in the same React tick
+   * (e.g. spam-clicking the Plinko "Drop" button) all see the same stale
+   * `balance` state and the second call falsely reports "not enough coins".
+   *
+   * React state stays in sync by setting both the ref and the state inside
+   * every mutator. The ref is always considered authoritative.
+   */
+  const balanceRef = useRef(DEFAULT_COIN_BALANCE);
+
+  const commit = useCallback((next: number) => {
+    const clamped = Math.max(0, next);
+    balanceRef.current = clamped;
+    setBalanceState(clamped);
+    return clamped;
+  }, []);
+
   useEffect(() => {
     if (!authReady) return;
 
     if (user) {
-      syncCoinsFromUser(user, setBalanceState);
+      commit(user.coins);
+      writeStoredBalance(user.coins);
       setReady(true);
       return;
     }
 
-    setBalanceState(readStoredBalance());
+    commit(readStoredBalance());
     setReady(true);
-  }, [authReady, user]);
+  }, [authReady, user, commit]);
 
   useEffect(() => {
     const onAuthChanged = (e: Event) => {
       const detail = (e as CustomEvent<PublicUser | null>).detail;
-      if (detail) syncCoinsFromUser(detail, setBalanceState);
-      else setBalanceState(readStoredBalance());
+      if (detail) {
+        commit(detail.coins);
+        writeStoredBalance(detail.coins);
+      } else {
+        commit(readStoredBalance());
+      }
     };
     window.addEventListener("pdd-auth-changed", onAuthChanged);
     return () => window.removeEventListener("pdd-auth-changed", onAuthChanged);
-  }, []);
+  }, [commit]);
 
   useEffect(() => {
     if (!ready) return;
@@ -84,36 +103,35 @@ export function CoinsProvider({ children }: { children: React.ReactNode }) {
     };
   }, [balance, ready, user]);
 
-  const setBalance = useCallback((next: number | ((prev: number) => number)) => {
-    setBalanceState((prev) => {
-      const value = typeof next === "function" ? next(prev) : next;
-      return Math.max(0, value);
-    });
-  }, []);
+  const setBalance = useCallback(
+    (next: number | ((prev: number) => number)) => {
+      const value = typeof next === "function" ? next(balanceRef.current) : next;
+      commit(value);
+    },
+    [commit],
+  );
 
-  const applyEffect = useCallback((effect: CoinEffect) => {
-    let result = 0;
-    setBalanceState((prev) => {
-      result = applyCoinEffect(prev, effect);
-      return result;
-    });
-    return result;
-  }, []);
+  const applyEffect = useCallback(
+    (effect: CoinEffect) => commit(applyCoinEffect(balanceRef.current, effect)),
+    [commit],
+  );
 
-  const trySpend = useCallback((amount: number) => {
-    let ok = false;
-    setBalanceState((prev) => {
-      if (prev < amount) return prev;
-      ok = true;
-      return prev - amount;
-    });
-    return ok;
-  }, []);
+  const trySpend = useCallback(
+    (amount: number) => {
+      if (balanceRef.current < amount) return false;
+      commit(balanceRef.current - amount);
+      return true;
+    },
+    [commit],
+  );
 
-  const addCoins = useCallback((amount: number) => {
-    if (amount <= 0) return;
-    setBalanceState((prev) => prev + amount);
-  }, []);
+  const addCoins = useCallback(
+    (amount: number) => {
+      if (amount <= 0) return;
+      commit(balanceRef.current + amount);
+    },
+    [commit],
+  );
 
   const value = useMemo(
     () => ({ balance, ready, setBalance, applyEffect, trySpend, addCoins }),

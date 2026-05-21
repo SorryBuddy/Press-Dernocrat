@@ -8,10 +8,44 @@ import {
   wheelSegments,
   type WheelSegment,
 } from "@/lib/wheel-segments";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 const SPIN_DURATION_MS = 4500;
 const FULL_ROTATIONS = 5;
+
+/**
+ * Geometry conventions used throughout this component:
+ *
+ *  - The conic gradient is the DEFAULT (no `from` offset), so it starts at the
+ *    top (12 o'clock) and proceeds clockwise. Segment `i` occupies the wedge
+ *    [i * segAng, (i+1) * segAng] measured clockwise from the top.
+ *  - The pointer is fixed at the top, pointing down at the wheel.
+ *  - Wheel rotation `R` (in degrees, clockwise positive) means that the
+ *    segment whose original center sat at angle `θ` clockwise from top now
+ *    sits at angle `(θ + R) mod 360`.
+ *  - Therefore the segment currently under the pointer is the one whose
+ *    rotated center is closest to 0 (mod 360).
+ *  - For CSS `transform: rotate(deg)`, 0deg means no rotation, and a label
+ *    positioned with `transform-origin: left` initially extends to the right
+ *    (3 o'clock = 90° clockwise from top). So to make a label extend toward
+ *    angle θ clockwise from top, we rotate it by (θ - 90)°.
+ */
+
+function modAngle(deg: number): number {
+  const m = deg % 360;
+  return m < 0 ? m + 360 : m;
+}
+
+/** Given a final rotation in degrees, return the segment index under the pointer. */
+function segmentAtPointer(rotationDeg: number, segments: WheelSegment[]): number {
+  const segAng = 360 / segments.length;
+  // In the wheel's local frame, the pointer (world top) is at angle (-R) cw from local top.
+  const localAngle = modAngle(-rotationDeg);
+  let idx = Math.floor(localAngle / segAng);
+  if (idx < 0) idx = 0;
+  if (idx >= segments.length) idx = segments.length - 1;
+  return idx;
+}
 
 export function WheelOfMisfortune() {
   const { balance, applyEffect } = useCoins();
@@ -19,6 +53,7 @@ export function WheelOfMisfortune() {
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<WheelSegment | null>(null);
   const [coinMessage, setCoinMessage] = useState<string | null>(null);
+  const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const segmentAngle = 360 / wheelSegments.length;
 
@@ -30,7 +65,8 @@ export function WheelOfMisfortune() {
         return `${seg.color} ${start}% ${end}%`;
       })
       .join(", ");
-    return `conic-gradient(from -90deg, ${stops})`;
+    // Default conic-gradient starts at the top and goes clockwise.
+    return `conic-gradient(${stops})`;
   }, []);
 
   const spin = useCallback(() => {
@@ -38,27 +74,41 @@ export function WheelOfMisfortune() {
 
     const landed = pickWeightedSegment();
     const index = wheelSegments.findIndex((s) => s.id === landed.id);
-    const segmentCenter = index * segmentAngle + segmentAngle / 2;
 
-    const before = balance;
+    // Small random offset inside the segment (clamped so it stays inside),
+    // makes the wheel feel less robotic without changing which segment wins.
+    const offsetWithinSegment = (Math.random() - 0.5) * (segmentAngle * 0.7);
+    const segmentCenter = index * segmentAngle + segmentAngle / 2;
+    const targetCenter = segmentCenter + offsetWithinSegment;
+
+    // Rotation needed so that the pointer (at top, world angle 0) lines up
+    // with the (rotated) segment center: targetCenter + R ≡ 0 (mod 360)
+    // ⇒ R ≡ -targetCenter (mod 360).
+    const targetMod = modAngle(-targetCenter);
+
     setSpinning(true);
     setResult(null);
     setCoinMessage(null);
-    setRotation((prev) => {
-      const currentMod = ((prev % 360) + 360) % 360;
-      const targetMod = (360 - segmentCenter + 360) % 360;
-      let delta = targetMod - currentMod;
-      if (delta <= 0) delta += 360;
-      return prev + FULL_ROTATIONS * 360 + delta;
-    });
 
-    setTimeout(() => {
-      const after = applyEffect(landed.coinEffect);
+    const before = balance;
+    const currentMod = modAngle(rotation);
+    let delta = targetMod - currentMod;
+    if (delta <= 0) delta += 360;
+    const finalRotation = rotation + FULL_ROTATIONS * 360 + delta;
+    setRotation(finalRotation);
+
+    if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
+    spinTimeoutRef.current = setTimeout(() => {
+      // Read the segment currently under the pointer from the actual rotation
+      // we just animated to. This guarantees the visible segment IS the prize.
+      const actualIndex = segmentAtPointer(finalRotation, wheelSegments);
+      const actualSegment = wheelSegments[actualIndex] ?? landed;
+      const after = applyEffect(actualSegment.coinEffect);
       setSpinning(false);
-      setResult(landed);
+      setResult(actualSegment);
       setCoinMessage(formatCoinDelta(before, after));
     }, SPIN_DURATION_MS);
-  }, [spinning, segmentAngle, balance, applyEffect]);
+  }, [spinning, segmentAngle, balance, rotation, applyEffect]);
 
   return (
     <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-b from-[#2a1528] to-[#120a14] p-6 shadow-2xl shadow-black/50">
@@ -85,13 +135,17 @@ export function WheelOfMisfortune() {
             }}
           >
             {wheelSegments.map((seg, i) => {
-              const angle = i * segmentAngle + segmentAngle / 2;
+              const centerAngle = i * segmentAngle + segmentAngle / 2;
+              // CSS rotate(0) makes the label extend to the right (3 o'clock,
+              // which is 90° cw from top). To extend toward `centerAngle` cw
+              // from top we subtract 90°.
+              const labelRot = centerAngle - 90;
               return (
                 <span
                   key={seg.id}
-                  className="absolute left-1/2 top-1/2 w-[42%] origin-left -translate-y-1/2 text-center font-sans text-[8px] font-bold leading-tight text-white drop-shadow-md sm:text-[9px]"
+                  className="pointer-events-none absolute left-1/2 top-1/2 w-[44%] origin-left -translate-y-1/2 pr-2 text-right font-sans text-[8px] font-bold uppercase leading-tight tracking-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] sm:text-[9px]"
                   style={{
-                    transform: `rotate(${angle}deg) translateX(18%)`,
+                    transform: `rotate(${labelRot}deg)`,
                   }}
                 >
                   {seg.shortLabel}
@@ -153,7 +207,7 @@ export function WheelOfMisfortune() {
               />
               <span>
                 {s.shortLabel}: {describeCoinEffect(s.coinEffect)}
-                {s.id === "jackpot" ? " ★ rare" : ""}
+                {s.id === "jackpot" || s.id === "times-10" ? " ★ very rare" : ""}
               </span>
             </li>
           ))}

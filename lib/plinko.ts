@@ -1,38 +1,89 @@
-import type { CoinEffect } from "@/lib/coins";
+/**
+ * Plinko config — Stake-style.
+ *
+ * Multiplier tables match the standard public Stake Originals plinko payouts
+ * for 8 / 12 / 16 rows at Low / Medium / High risk. Each row of pegs ends in
+ * `rows + 1` slots, with multipliers symmetric around the center.
+ *
+ * House edge comes from the fact that, under a true binomial distribution
+ * (50/50 left/right at each peg), the expected return is < 1× the bet.
+ */
 
-export type PlinkoSlot = {
-  id: string;
-  label: string;
-  color: string;
-  coinEffect: CoinEffect;
+export const PLINKO_RISKS = ["low", "medium", "high"] as const;
+export type PlinkoRisk = (typeof PLINKO_RISKS)[number];
+
+export const PLINKO_ROW_OPTIONS = [8, 12, 16] as const;
+export type PlinkoRows = (typeof PLINKO_ROW_OPTIONS)[number];
+
+export const PLINKO_MIN_BET = 1;
+export const PLINKO_MAX_BET = 500;
+export const PLINKO_DEFAULT_BET = 10;
+
+/** Legacy export — single-drop cost used by older UI. Kept for compatibility. */
+export const PLINKO_DROP_COST = PLINKO_DEFAULT_BET;
+
+const TABLES: Record<PlinkoRows, Record<PlinkoRisk, number[]>> = {
+  8: {
+    low: [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6],
+    medium: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
+    high: [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
+  },
+  12: {
+    low: [10, 3, 1.6, 1.4, 1.1, 1.0, 0.5, 1.0, 1.1, 1.4, 1.6, 3, 10],
+    medium: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
+    high: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
+  },
+  16: {
+    low: [16, 9, 2, 1.4, 1.4, 1.2, 1.1, 1.0, 0.5, 1.0, 1.1, 1.2, 1.4, 1.4, 2, 9, 16],
+    medium: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110],
+    high: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000],
+  },
 };
 
-export const PLINKO_ROWS = 8;
-export const PLINKO_COLUMNS = 9;
-
-/** Bottom slots — index matches final column (0 = left). */
-export const plinkoSlots: PlinkoSlot[] = [
-  { id: "p0", label: "−25", color: "#450a0a", coinEffect: { type: "add", amount: -25 } },
-  { id: "p1", label: "×0.5", color: "#7f1d1d", coinEffect: { type: "multiply", factor: 0.5 } },
-  { id: "p2", label: "−10", color: "#44403c", coinEffect: { type: "add", amount: -10 } },
-  { id: "p3", label: "+10", color: "#312e81", coinEffect: { type: "add", amount: 10 } },
-  { id: "p4", label: "×2", color: "#14532d", coinEffect: { type: "multiply", factor: 2 } },
-  { id: "p5", label: "+25", color: "#854d0e", coinEffect: { type: "add", amount: 25 } },
-  { id: "p6", label: "×1.5", color: "#a16207", coinEffect: { type: "multiply", factor: 1.5 } },
-  { id: "p7", label: "+50", color: "#4c1d95", coinEffect: { type: "add", amount: 50 } },
-  { id: "p8", label: "×3", color: "#065f46", coinEffect: { type: "multiply", factor: 3 } },
-];
-
-/** Random walk from center; returns final column 0..8. */
-export function simulatePlinkoPath(): { column: number; steps: number[] } {
-  let column = Math.floor(PLINKO_COLUMNS / 2);
-  const steps: number[] = [column];
-
-  for (let row = 0; row < PLINKO_ROWS; row++) {
-    const dir = Math.random() < 0.5 ? -1 : 1;
-    column = Math.max(0, Math.min(PLINKO_COLUMNS - 1, column + dir));
-    steps.push(column);
-  }
-
-  return { column, steps };
+export function getPlinkoMultipliers(rows: PlinkoRows, risk: PlinkoRisk): number[] {
+  return TABLES[rows][risk];
 }
+
+/**
+ * Slot color follows the canonical Stake palette: hot reds/oranges on the
+ * extreme outer slots (rare, big multipliers) cooling toward yellow as the
+ * multiplier drops, with the worst (sub-1×) slots using a muted amber/yellow.
+ */
+export function plinkoSlotColor(multiplier: number): string {
+  if (multiplier >= 50) return "#7f1d1d";
+  if (multiplier >= 20) return "#b91c1c";
+  if (multiplier >= 10) return "#dc2626";
+  if (multiplier >= 5) return "#ea580c";
+  if (multiplier >= 2) return "#f97316";
+  if (multiplier >= 1.3) return "#fb923c";
+  if (multiplier >= 1.0) return "#fbbf24";
+  if (multiplier >= 0.5) return "#f59e0b";
+  return "#b45309";
+}
+
+export function formatMultiplier(m: number): string {
+  if (m >= 100) return `${Math.round(m)}×`;
+  if (m >= 10) return `${m.toFixed(0)}×`;
+  return `${m.toFixed(m % 1 === 0 ? 0 : m < 1 ? 1 : 1)}×`;
+}
+
+/* ---------- Physics tuning ---------- */
+
+/**
+ * Tuned to feel close to the Stake Plinko engine: gravity dominates, peg
+ * collisions lose ~half their energy and add a small random kick so the
+ * outcome distribution looks roughly binomial but no two drops are identical.
+ */
+export const PLINKO_PHYSICS = {
+  gravity: 0.16,
+  airFriction: 0.999,
+  restitution: 0.55,
+  /** Small horizontal kick added on every peg hit (rad/frame-ish). */
+  pegJitter: 0.55,
+  /** Max horizontal speed clamp so balls don't fly off the rails. */
+  maxVx: 4.5,
+  /** Random horizontal velocity given at spawn so the first peg is non-deterministic. */
+  spawnVx: 0.6,
+  /** Sub-steps per animation frame for stable collisions. */
+  subSteps: 4,
+} as const;
